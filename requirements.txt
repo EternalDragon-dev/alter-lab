@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+requests
+python-dotenv
+sqlalchemy
+sentence-transformers
+faiss-cpu
+openai
+pytest
