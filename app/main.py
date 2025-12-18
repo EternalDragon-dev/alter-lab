@@ -19,7 +19,7 @@ def root():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Omega Lab Chat</title>
+        <title>Alter Lab Chat</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -65,8 +65,8 @@ def root():
     </head>
     <body>
         <div class="container">
-            <h1>🔮 Omega Lab Chat</h1>
-            <p>Send a message to Omega:</p>
+            <h1>🔮 Alter Lab Chat</h1>
+            <p>Send a message to Alter:</p>
             <input type="text" id="message" placeholder="Type your message here..." />
             <button onclick="sendMessage()">Send</button>
             <div id="response"></div>
@@ -95,7 +95,7 @@ def root():
                         body: JSON.stringify({ message: message })
                     });
                     const data = await response.json();
-                    responseDiv.innerHTML = '<strong>Omega:</strong> ' + data.response;
+                    responseDiv.innerHTML = '<strong>Alter:</strong> ' + data.response;
                 } catch (error) {
                     responseDiv.innerHTML = '❌ Error: ' + error.message;
                 }
@@ -111,7 +111,7 @@ def root():
 
 @app.get("/ping")
 def ping():
-    return {"status": "pong", "who": "Omega Lab"}
+    return {"status": "pong", "who": "Alter Lab"}
 
 @app.post("/chat")
 def chat(user: UserMessage):
