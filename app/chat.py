@@ -3,7 +3,7 @@ from .db import save_conversation
 from .embeddings import embed_text
 
 def generate_response(user_message):
-    # For now, echo with a little Omega flavor
+    # For now, echo with a little Alter flavor
     bot_message = f"Ooooh, I got your message: '{user_message}'"
     
     # Save to memory
