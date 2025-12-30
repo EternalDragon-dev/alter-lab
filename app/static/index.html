@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alter Lab - AI Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #34495e;
+        }
+        .sidebar-header {
+            padding: 20px;
+            background: #34495e;
+            border-bottom: 1px solid #2c3e50;
+        }
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .new-chat-btn {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .new-chat-btn:hover {
+            background: #2980b9;
+        }
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .conversation-item {
+            padding: 12px;
+            margin-bottom: 5px;
+            background: #34495e;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .conversation-item:hover {
+            background: #415769;
+        }
+        .conversation-item.active {
+            background: #3498db;
+        }
+        .conversation-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .conversation-meta {
+            font-size: 11px;
+            color: #95a5a6;
+        }
+        .delete-btn {
+            float: right;
+            padding: 2px 8px;
+            background: #e74c3c;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+        /* Main chat area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header h1 {
+            font-size: 24px;
+            color: #2c3e50;
+        }
+        .status {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .status.online {
+            color: #27ae60;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .message {
+            margin-bottom: 20px;
+            max-width: 70%;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            margin-left: auto;
+        }
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+        .message.user .message-content {
+            background: #3498db;
+            color: white;
+        }
+        .message.assistant .message-content {
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .message-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .loading {
+            display: flex;
+            gap: 5px;
+            padding: 12px 16px;
+        }
+        .loading span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3498db;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .loading span:nth-child(1) { animation-delay: -0.32s; }
+        .loading span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        /* Input area */
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e1e8ed;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .input-container input:focus {
+            border-color: #3498db;
+        }
+        .send-btn {
+            padding: 12px 24px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .send-btn:hover {
+            background: #2980b9;
+        }
+        .send-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .links {
+            padding: 15px 20px;
+            background: #34495e;
+            border-top: 1px solid #2c3e50;
+        }
+        .links a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 12px;
+            margin-right: 15px;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>🔮 Alter Lab</h2>
+                <button class="new-chat-btn" onclick="newConversation()">+ New Conversation</button>
+            </div>
+            <div class="conversations-list" id="conversationsList">
+                <!-- Conversations loaded here -->
+            </div>
+            <div class="links">
+                <a href="/docs" target="_blank">📚 API Docs</a>
+                <a href="/health" target="_blank">🏥 Health</a>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h1>Chat with Alter</h1>
+                <div class="status" id="status">Checking status...</div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state">
+                    <h3>👋 Welcome to Alter Lab!</h3>
+                    <p>Start a new conversation or select one from the sidebar</p>
+                </div>
+            </div>
+            <div class="chat-input">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type your message..." 
+                        disabled
+                    />
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentConversationId = null;
+        let isLoading = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkHealth();
+            await loadConversations();
+            
+            // Enable enter key
+            document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !isLoading) {
+                    sendMessage();
+                }
+            });
+        });
+
+        // Check API health
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                const statusEl = document.getElementById('status');
+                if (data.ollama.status === 'online') {
+                    statusEl.textContent = '🟢 Online';
+                    statusEl.classList.add('online');
+                } else {
+                    statusEl.textContent = '🔴 Ollama Offline';
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = '🔴 API Error';
+            }
+        }
+
+        // Load conversations list
+        async function loadConversations() {
+            try {
+                const response = await fetch('/conversations');
+                const data = await response.json();
+                const list = document.getElementById('conversationsList');
+                
+                if (data.conversations.length === 0) {
+                    list.innerHTML = '<div style="padding: 20px; text-align: center; color: #95a5a6;">No conversations yet</div>';
+                    return;
+                }
+                
+                list.innerHTML = data.conversations.map(conv => `
+                    <div class="conversation-item ${conv.conversation_id === currentConversationId ? 'active' : ''}" 
+                         onclick="selectConversation('${conv.conversation_id}')">
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteConversation('${conv.conversation_id}')">✕</button>
+                        <div class="conversation-title">${conv.title || 'New Conversation'}</div>
+                        <div class="conversation-meta">${conv.message_count} messages</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+            }
+        }
+
+        // Select conversation
+        async function selectConversation(conversationId) {
+            currentConversationId = conversationId;
+            await loadConversations();
+            await loadMessages(conversationId);
+            
+            // Enable input
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+        }
+
+        // Load messages for a conversation
+        async function loadMessages(conversationId) {
+            try {
+                const response = await fetch(`/conversations/${conversationId}`);
+                const data = await response.json();
+                const messagesDiv = document.getElementById('chatMessages');
+                
+                messagesDiv.innerHTML = data.messages.map(msg => `
+                    <div class="message user">
+                        <div class="message-label">You</div>
+                        <div class="message-content">${escapeHtml(msg.user_message)}</div>
+                    </div>
+                    <div class="message assistant">
+                        <div class="message-label">Alter</div>
+                        <div class="message-content">${escapeHtml(msg.bot_response)}</div>
+                    </div>
+                `).join('');
+                
+                // Scroll to bottom
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // Create new conversation
+        async function newConversation() {
+            try {
+                const response = await fetch('/conversations', { method: 'POST' });
+                const data = await response.json();
+                currentConversationId = data.conversation_id;
+                
+                document.getElementById('chatMessages').innerHTML = '<div class="empty-state"><h3>👋 New Conversation</h3><p>Start chatting!</p></div>';
+                document.getElementById('messageInput').disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('messageInput').focus();
+                
+                await loadConversations();
+            } catch (error) {
+                alert('Error creating conversation: ' + error.message);
+            }
+        }
+
+        // Send message
+        async function sendMessage() {
+            if (isLoading || !currentConversationId) return;
+            
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            isLoading = true;
+            document.getElementById('sendBtn').disabled = true;
+            
+            // Add user message to UI
+            const messagesDiv = document.getElementById('chatMessages');
+            const emptyState = messagesDiv.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            messagesDiv.innerHTML += `
+                <div class="message user">
+                    <div class="message-label">You</div>
+                    <div class="message-content">${escapeHtml(message)}</div>
+                </div>
+                <div class="message assistant">
+                    <div class="message-label">Alter</div>
+                    <div class="message-content"><div class="loading"><span></span><span></span><span></span></div></div>
+                </div>
+            `;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            input.value = '';
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_id: currentConversationId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Replace loading indicator with response
+                const assistantMessages = messagesDiv.querySelectorAll('.message.assistant');
+                const lastAssistant = assistantMessages[assistantMessages.length - 1];
+                lastAssistant.querySelector('.message-content').innerHTML = escapeHtml(data.response);
+                
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                await loadConversations(); // Update sidebar
+            } catch (error) {
+                alert('Error: ' + error.message);
+                const assistantMessages = messagesDiv.querySelectorAll('.message.assistant');
+                const lastAssistant = assistantMessages[assistantMessages.length - 1];
+                lastAssistant.querySelector('.message-content').innerHTML = '❌ Error sending message';
+            } finally {
+                isLoading = false;
+                document.getElementById('sendBtn').disabled = false;
+                input.focus();
+            }
+        }
+
+        // Delete conversation
+        async function deleteConversation(conversationId) {
+            if (!confirm('Delete this conversation?')) return;
+            
+            try {
+                await fetch(`/conversations/${conversationId}`, { method: 'DELETE' });
+                
+                if (conversationId === currentConversationId) {
+                    currentConversationId = null;
+                    document.getElementById('chatMessages').innerHTML = '<div class="empty-state"><h3>👋 Conversation Deleted</h3><p>Start a new conversation</p></div>';
+                    document.getElementById('messageInput').disabled = true;
+                    document.getElementById('sendBtn').disabled = true;
+                }
+                
+                await loadConversations();
+            } catch (error) {
+                alert('Error deleting conversation: ' + error.message);
+            }
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -37,17 +37,36 @@
    pip install -r requirements.txt
    ```
 
-3. **Start the server:**
+3. **Ensure Ollama is running:**
    ```bash
-   python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   # Start Ollama service
+   brew services start ollama
+   
+   # Verify it's running
+   curl http://localhost:11434/api/tags
    ```
 
-4. **Open in browser:**
+4. **Start the server:**
+   
+   **Option A: Using the startup script (recommended)**
+   ```bash
+   ./start.sh
+   ```
+   
+   **Option B: Manual start**
+   ```bash
+   python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+5. **Open in browser:**
    ```
    http://localhost:8000
    ```
 
-That's it! Start chatting with the AI.
+That's it! The interface will load with:
+- Conversation history sidebar on the left
+- Chat interface in the center
+- Real AI responses using Ollama (llama3.2:1b model)
 
 ## Usage
 
@@ -183,13 +202,16 @@ Deploy to Railway, Render, or Fly.io:
 - [x] Basic chat functionality
 - [x] Conversation persistence
 - [x] RESTful API
-- [ ] Real AI model integration
-- [ ] Conversation history UI
-- [ ] Semantic search
+- [x] Real AI model integration (Ollama + OpenAI fallback)
+- [x] Conversation history UI with sidebar
+- [x] Multi-conversation support
+- [x] Conversation management (create, delete, switch)
+- [x] Real-time chat interface
+- [ ] Semantic search with embeddings
 - [ ] User authentication
 - [ ] Multi-user support
 - [ ] Export conversations
-- [ ] Dark mode
+- [ ] Markdown rendering for AI responses
 
 ## Screenshots
 
